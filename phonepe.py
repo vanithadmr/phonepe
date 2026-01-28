@@ -874,7 +874,15 @@ elif option == 'Data_Visualization':
         '<p style="font-size:30px; color:red;">Device Dominance And User Engagement Analysis </p>',
         unsafe_allow_html=True
     ) 
-    # device dominance and user engagement analysis:
+    # device dominance and user engagement analysis: 
+    # agg user:
+    query = "SELECT Brands, SUM(Transaction_count) AS Total_transaction_count FROM agg_user GROUP BY Brands ORDER BY Brands"
+    cursor.execute(query)
+    tablee = cursor.fetchall()
+    df_device = pd.DataFrame(tablee, columns = ['Brands', 'Total_transaction_count'])
+    fig_barr = px.bar(df_device, x = 'Brands', y = 'Total_transaction_count', title = 'Total_transaction_count vs across Device Brands',
+                      color_discrete_sequence =px.colors.sequential.Magenta)
+    
     # Years and Quater Wise App_opens :
     query = """SELECT Years,Quaters,SUM(App_opens_users) AS App_opens_users 
                FROM map_user 
@@ -888,17 +896,18 @@ elif option == 'Data_Visualization':
     
     # Apps_Not_opens districts  :
 
-    query = """SELECT States,COUNT(States) AS App_notopens_count 
+    query = """SELECT Districts,SUM(Register_users) AS Register_users
                FROM map_user 
                WHERE App_opens_users = 0 
-               GROUP BY States"""
+               GROUP BY Districts
+               ORDER BY Register_users"""
     cursor.execute(query)
     table22 = cursor.fetchall()
-    df22 = pd.DataFrame(table22, columns = ['States','App_notopens_count'])
-    fig_bar = px.bar(df22, x = 'States', y = 'App_notopens_count',title = "Apps_Not_opens districts") 
+    df22 = pd.DataFrame(table22, columns = ['Districts', 'Register_users'])
+    fig_bar = px.bar(df22, x = 'Districts', y = 'Register_users', title = "Apps_Not_opens Districts based on Register_user") 
 
     # States Wise Register_Users And App_opens_count :
-    query = """SELECT States,SUM(Register_users) AS Register_user,SUM(App_opens_users) AS App_opens_users 
+    query = """SELECT States,SUM(Register_users) AS Register_users,SUM(App_opens_users) AS App_opens_users 
                FROM map_user 
                GROUP BY States"""
     cursor.execute(query)
@@ -906,7 +915,7 @@ elif option == 'Data_Visualization':
     df23 = pd.DataFrame(table23, columns = ['States', 'Register_users', 'App_opens_users'])
     fig_scatter = px.scatter(df23, x = 'Register_users', y = 'App_opens_users', 
                              color = 'States', 
-                             title = "States Wise Register_Users And App_opens_coun" ) 
+                             title = "States Wise Register_Users And App_opens_count" ) 
 
     # Top 10 districts hightest register uesr: 
 
@@ -946,15 +955,15 @@ elif option == 'Data_Visualization':
     
 
     fig_combined = make_subplots(rows = 2, cols = 3, subplot_titles =(" Years and Quater Wise App_opens ",
-                                                                "Apps_Not_opens districts",
+                                                                'Total_transaction_count vs across Device Brands',
                                                                 "States Wise Register_Users And App_opens_count",
                                                                 "Top 10 districts hightest register uesr ",
                                                                 "States wise Register_users",
-                                                                "Apps_opens_districts"))
+                                                                "Apps_Not_opens Districts based on Register_users"))
         
     for trace in fig_line.data: 
         fig_combined.add_trace(trace, row = 1, col = 1) 
-    for trace in fig_bar.data:
+    for trace in fig_barr.data:
             fig_combined.add_trace(trace, row = 1, col = 2) 
     for trace in fig_scatter.data:
             fig_combined.add_trace(trace, row = 1, col = 3) 
@@ -962,7 +971,7 @@ elif option == 'Data_Visualization':
             fig_combined.add_trace(trace, row = 2, col = 1) 
     for trace in fig_bar3.data:
             fig_combined.add_trace(trace, row = 2, col = 2) 
-    for trace in fig_bar4.data:
+    for trace in fig_bar.data:
             fig_combined.add_trace(trace, row = 2, col = 3) 
 
 
@@ -1003,7 +1012,7 @@ elif option == 'Data_Visualization':
     districts([option1])
 
     # Transaction_count Across States
-    query = """SELECT States, COUNT(Transaction_count) AS Transaction_count 
+    query = """SELECT States, SUM(Transaction_count) AS Transaction_count 
                FROM map_insurance 
                GROUP BY States 
                ORDER BY Transaction_count DESC LIMIT 10""" 
@@ -1016,7 +1025,7 @@ elif option == 'Data_Visualization':
    
 
     # Transaction_count Across Districts:
-    query = """SELECT Districts, COUNT(Transaction_count) AS Transaction_count 
+    query = """SELECT Districts, SUM(Transaction_count) AS Transaction_count 
                FROM map_insurance 
                GROUP BY Districts 
                ORDER BY Transaction_count DESC LIMIT 10""" 
@@ -1029,7 +1038,7 @@ elif option == 'Data_Visualization':
     
     
     # Transaction_count Across Pincodes:
-    query = """SELECT States,Pincodes, COUNT(Transaction_count) AS Transaction_count 
+    query = """SELECT States,Pincodes, SUM(Transaction_count) AS Transaction_count 
                FROM top_insurance 
                GROUP BY States,Pincodes 
                ORDER BY Transaction_count DESC LIMIT 10""" 
@@ -1038,7 +1047,7 @@ elif option == 'Data_Visualization':
     df3 = pd.DataFrame(table3, columns = ['States','Pincodes', 'Total_Transaction_count']) 
     df3['Pincodes'] = df3['Pincodes'].astype('string')
     fig3 = px.bar(df3, x = 'States', y = 'Total_Transaction_count',
-                  color = 'Total_Transaction_count', 
+                  color = 'Pincodes', 
                   title = " Transaction_count Across Pincodes",
                   hover_name = 'Pincodes',
                   color_discrete_sequence = px.colors.sequential.Blackbody_r)
@@ -1072,7 +1081,7 @@ elif option == 'Data_Visualization':
     col51, col52 = st.columns([1,1]) 
     with col51: 
         # Transaction_count Across Districts:
-        query = """SELECT Districts, COUNT(Transaction_count) AS Transaction_count 
+        query = """SELECT Districts, SUM(Transaction_count) AS Transaction_count 
                    FROM map_insurance 
                    GROUP BY Districts 
                    ORDER BY Transaction_count DESC LIMIT 10""" 
@@ -1087,7 +1096,7 @@ elif option == 'Data_Visualization':
 
     with col52: 
         # Transaction_count Across Pincodes:
-        query = """SELECT States,Pincodes, COUNT(Transaction_count) AS Transaction_count 
+        query = """SELECT States,Pincodes, SUM(Transaction_count) AS Transaction_count 
         FROM top_insurance 
         GROUP BY States,Pincodes 
         ORDER BY Transaction_count DESC LIMIT 10""" 
@@ -1096,7 +1105,9 @@ elif option == 'Data_Visualization':
         table3 = cursor.fetchall()
         df3 = pd.DataFrame(table3, columns = ['States','Pincodes', 'Total_Transaction_count']) 
         df3['Pincodes'] = df3['Pincodes'].astype('string')
-        fig3 = px.bar(df3, x = 'States', y = 'Total_Transaction_count',color = 'Total_Transaction_count', title = " Transaction_count Across Pincodes",hover_name = 'Pincodes', color_discrete_sequence = px.colors.sequential.Blackbody_r)
+        fig3 = px.bar(df3, x = 'States', y = 'Total_Transaction_count', 
+                      title = " Transaction_count Across Pincodes",hover_name = 'Pincodes', 
+                      color_discrete_sequence = px.colors.sequential.Blackbody_r)
         st.plotly_chart(fig3, use_container_width=True)        
 
 
@@ -1148,7 +1159,7 @@ elif option == 'Data_Visualization':
     )  
 
     # Top Registration_users Across States
-    query = """SELECT States, COUNT(Register_users) AS Register_users 
+    query = """SELECT States, SUM(Register_users) AS Register_users 
                FROM map_user 
                GROUP BY States 
                ORDER BY Register_users DESC LIMIT 10""" 
@@ -1173,7 +1184,7 @@ elif option == 'Data_Visualization':
     
     
     # Transaction_count Across Pincodes:
-    query = """SELECT States,Pincodes, COUNT(Register_users) AS Register_users 
+    query = """SELECT States,Pincodes, SUM(Register_users) AS Register_users 
                FROM top_user 
                GROUP BY States,Pincodes 
                ORDER BY Register_users DESC LIMIT 10""" 
@@ -1184,27 +1195,49 @@ elif option == 'Data_Visualization':
                         title = " Top 10 Pincodes", 
                         color_discrete_sequence = px.colors.sequential.Magenta, hover_name = 'Pincodes')
     
-    
-
-    query = """SELECT Years, Quaters, COUNT(Register_users) AS Register_users 
-               FROM map_user WHERE Quaters = 1 
-               GROUP BY Years 
-               ORDER BY Years,Register_users DESC LIMIT 10"""
-     
-    cursor.execute(query)
-    table5 = cursor.fetchall()
-    df5 = pd.DataFrame(table5, columns = ['Years', 'Quaters', 'Total_Register_users']) 
-    fig5 = px.bar(df5, x = 'Years', y = 'Total_Register_users', color = 'Quaters', 
-                  title = " Transaction_count Across specific Quater and Years", 
-                  color_discrete_sequence = px.colors.sequential.Rainbow)
-    
+    col51,col52 = st.columns([1,1])
+    with col51:
+        def year_map1(year_map):
+            year_map = year_map
+            query = f"""SELECT Years, Quaters, SUM(Register_users) AS Register_users 
+                    FROM map_user WHERE Years = %s 
+                    GROUP BY Quaters 
+                    ORDER BY Quaters,Register_users DESC LIMIT 10"""
+            
+            cursor.execute(query,year_map)
+            table5 = cursor.fetchall()
+            df5 = pd.DataFrame(table5, columns = ['Years', 'Quaters', 'Total_Register_users']) 
+            fig5 = px.bar(df5, x = 'Quaters', y = 'Total_Register_users', color = 'Quaters', 
+                        title = "  Total_Register_users Across specific Quater and Years", 
+                        color_discrete_sequence = px.colors.sequential.Rainbow) 
+            
+            st.plotly_chart(fig5, use_container_width = True)
+        map_user_year = map_user['Years'].unique()
+        year_map = st.selectbox("SELECT_year", map_user_year)
+        year_map1([year_map]) 
+    with col52:
+        def states_map(states_map1):
+            data = states_map1
+            query = f"""SELECT States, Years, SUM(Register_users) AS Register_users 
+                    FROM map_user WHERE States = %s 
+                    GROUP BY Years 
+                    ORDER BY Years,Register_users DESC LIMIT 10"""
+            
+            cursor.execute(query,data)
+            table6 = cursor.fetchall()
+            df6 = pd.DataFrame(table6, columns = ['States', 'Years', 'Total_Register_users']) 
+            fig6 = px.bar(df6, x = 'Years', y = 'Total_Register_users', color = 'Years', 
+                        title = "  Total_Register_users Across specific Regions", 
+                        color_discrete_sequence = px.colors.sequential.Rainbow) 
+            
+            st.plotly_chart(fig6, use_container_width = True)
+        map_user_states = map_user['States'].unique()
+        states_map1 = st.selectbox("SELECT_States", map_user_states)
+        states_map([states_map1]) 
 
     fig_combined = make_subplots(rows = 2, cols = 2, subplot_titles =(" Top Registration_users Across States ",
                                                                 "Register_users Across Districts",
-                                                                "Top 10 Pincodes",
-                                                                "Transaction_count Across specific Quater and Years ",
-                                                                
-                                                                ))
+                                                                "Top 10 Pincodes"))
         
     for trace in fig1.data: 
         fig_combined.add_trace(trace, row = 1, col = 1) 
@@ -1212,9 +1245,7 @@ elif option == 'Data_Visualization':
             fig_combined.add_trace(trace, row = 1, col = 2) 
     for trace in fig3.data:
             fig_combined.add_trace(trace, row = 2, col = 1) 
-    for trace in fig5.data:
-            fig_combined.add_trace(trace, row = 2, col = 2) 
-
+    
  
     fig_combined.update_layout(width = 2000,height = 800) 
     st.plotly_chart(fig_combined, use_container_width=True) 
@@ -1225,10 +1256,10 @@ elif option == 'Data_Visualization':
     ) 
 
     # Top Districts value and volume: 
-    query = """SELECT Districts,COUNT(Transaction_count) AS Transaction_count,SUM(Transaction_amount) AS Transaction_amount 
+    query = """SELECT Districts,SUM(Transaction_count) AS Transaction_count,SUM(Transaction_amount) AS Transaction_amount 
                FROM map_transaction 
                GROUP BY Districts 
-               ORDER BY Transaction_count,Transaction_amount DESC LIMIT 10"""
+               ORDER BY Transaction_amount,Transaction_count DESC LIMIT 10"""
     cursor.execute(query)
     table1 = cursor.fetchall()
     df1 = pd.DataFrame(table1, columns = ['Districts', 'Transaction_count', 'Transaction_amount'])
@@ -1236,10 +1267,10 @@ elif option == 'Data_Visualization':
 
 
     # Top States value and volume: 
-    query = """SELECT States,COUNT(Transaction_count) AS Transaction_count,SUM(Transaction_amount) AS Transaction_amount 
+    query = """SELECT States,SUM(Transaction_count) AS Transaction_count,SUM(Transaction_amount) AS Transaction_amount 
                FROM map_transaction 
                GROUP BY States 
-               ORDER BY Transaction_count,Transaction_amount DESC LIMIT 10"""
+               ORDER BY Transaction_amount,Transaction_count DESC LIMIT 10"""
     cursor.execute(query)
     table2 = cursor.fetchall()
     df2 = pd.DataFrame(table2, columns = ['States', 'Transaction_count', 'Transaction_amount'])
@@ -1247,17 +1278,17 @@ elif option == 'Data_Visualization':
      
 
     # Top Pincodes Transaction value and volume: 
-    query = """SELECT Pincodes,COUNT(Transaction_count) AS Transaction_count,SUM(Transaction_amount) AS Transaction_amount 
+    query = """SELECT Pincodes,SUM(Transaction_count) AS Transaction_count,SUM(Transaction_amount) AS Transaction_amount 
                FROM top_transaction 
                GROUP BY Pincodes 
-               ORDER BY Transaction_count,Transaction_amount,Pincodes DESC LIMIT 10"""
+               ORDER BY Transaction_amount,Transaction_count DESC LIMIT 10"""
     cursor.execute(query)
     table3 = cursor.fetchall()
     df3 = pd.DataFrame(table3, columns = ['Pincodes', 'Transaction_count', 'Transaction_amount'])
     fig3 = px.scatter(df3, x = 'Transaction_amount' , y = 'Transaction_count', hover_name='Pincodes',title = " Top Pincodes Transaction value and volume")
 
     # specific year TRansaction_count and transaction amount:
-    query = """SELECT Years,Quaters, COUNT(Transaction_count) AS Transaction_count, SUM(Transaction_amount) AS Transaction_amount FROM 
+    query = """SELECT Years,Quaters, SUM(Transaction_count) AS Transaction_count, SUM(Transaction_amount) AS Transaction_amount FROM 
                map_transaction WHERE Years = 2021 
                GROUP BY Quaters 
                ORDER BY Quaters,Transaction_count,Transaction_amount DESC LIMIT 10"""
@@ -1268,7 +1299,7 @@ elif option == 'Data_Visualization':
     
 
     # specific year TRansaction_count and transaction amount:
-    query = """SELECT Years,Quaters, COUNT(Transaction_count) AS Transaction_count, SUM(Transaction_amount) AS Transaction_amount 
+    query = """SELECT Years,Quaters, SUM(Transaction_count) AS Transaction_count, SUM(Transaction_amount) AS Transaction_amount 
                FROM map_transaction 
                WHERE Years = 2021 GROUP BY Quaters 
                ORDER BY Quaters,Transaction_count,Transaction_amount DESC LIMIT 10"""
@@ -1300,14 +1331,15 @@ elif option == 'Data_Visualization':
          # specific year TRansaction_count and transaction amount:
         def yearmap(year):
             year31 = year
-            query = f"""SELECT Years,Quaters, COUNT(Transaction_count) AS Transaction_count, SUM(Transaction_amount) AS Transaction_amount 
+            query = f"""SELECT Years,Quaters, SUM(Transaction_count) AS Transaction_count, SUM(Transaction_amount) AS Transaction_amount 
                         FROM map_transaction 
                         WHERE Years = %s GROUP BY Quaters 
                         ORDER BY Quaters,Transaction_count,Transaction_amount DESC LIMIT 10"""
             cursor.execute(query,year31)
             table4 = cursor.fetchall()
             df4 = pd.DataFrame(table4, columns = ['Years',"Quaters", 'Transaction_count', 'Transaction_amount'])
-            fig4 = px.bar(df4,x = 'Quaters', y = 'Transaction_count', color = 'Transaction_count',title = 'Transaction_Count of year of 2020',hover_name='Years',color_discrete_sequence = px.colors.sequential.Aggrnyl)
+            fig4 = px.bar(df4,x = 'Quaters', y = 'Transaction_count', color = 'Transaction_count', 
+                          title = f'Map_Transaction_Total_Count of year of {year31[0]}',hover_name='Years',color_discrete_sequence = px.colors.sequential.Aggrnyl)
             st.plotly_chart(fig4, use_container_width=True) 
         year_list31 = map_transaction['Years'].unique()
         option31 = st.selectbox("Years_map1",year_list31)
@@ -1317,7 +1349,7 @@ elif option == 'Data_Visualization':
     with col32: 
         def yearmap(year):
             year32 = year
-            query = f"""SELECT Years,Quaters, COUNT(Transaction_count) AS Transaction_count, SUM(Transaction_amount) AS Transaction_amount 
+            query = f"""SELECT Years,Quaters, SUM(Transaction_count) AS Transaction_count, SUM(Transaction_amount) AS Transaction_amount 
                         FROM map_transaction 
                         WHERE Years = %s 
                         GROUP BY Quaters 
@@ -1325,7 +1357,8 @@ elif option == 'Data_Visualization':
             cursor.execute(query,year32)
             table5 = cursor.fetchall()
             df5 = pd.DataFrame(table5, columns = ['Years',"Quaters", 'Transaction_count', 'Transaction_amount'])
-            fig5 = px.bar(df5,x = 'Years', y = 'Transaction_amount',title = 'Map_transaction Transaction_amount of year of 2020', hover_name='Quaters',color = 'Transaction_amount') 
+            fig5 = px.bar(df5,x = 'Years', y = 'Transaction_amount',title = f'Map_Transaction_Total_amount of year of {year32[0]}', hover_name='Quaters',
+                          color = 'Transaction_amount') 
             st.plotly_chart(fig5, use_container_width=True) 
         year_list33 = map_transaction['Years'].unique()
         option32 = st.selectbox("Years_map",year_list33)
@@ -1334,9 +1367,12 @@ elif option == 'Data_Visualization':
     
 
     
-elif option == 'TOP_charts':
-    st.set_page_config(layout ='wide')
-    st.title("TOP CHARTS") 
+elif option == 'TOP_charts': 
+
+    st.markdown(
+        '<p style="font-size:30px; color:blue;">Insurance Transaction Analysis </p>',
+        unsafe_allow_html=True
+        )  
 
     options = [ "Agg_insurance", "Map_insurance", "Top_insurance"] 
      
@@ -1344,7 +1380,7 @@ elif option == 'TOP_charts':
     selected_option = st.selectbox("Insurance Analysis Of :", options)
 
     def year_quater_combinations(year,table_name):
-        data = year
+        data = year 
         query = f"""SELECT States,Quaters,SUM(Transaction_amount) AS Transaction_amount 
                     FROM {table_name} 
                     WHERE Years = %s 
@@ -1354,125 +1390,97 @@ elif option == 'TOP_charts':
         cursor.execute(query,data)
         table = cursor.fetchall()
         df1= pd.DataFrame(table, columns = ['States','Quaters','Transaction_amount'])
-        fig1 = px.bar(df1, x = 'States', y = 'Transaction_amount',color = "Transaction_amount", hover_name = 'Quaters' ,title =f"year and quater combinations for top 10 states : {table_name}")
-        st.plotly_chart(fig1, use_container_width=True)
+        df1['States'] = df1['States'].str.strip().str.title()
+        fig1 = px.bar(df1, y = 'States', x = 'Transaction_amount', orientation='h', color = "Transaction_amount", hover_name = 'Quaters', 
+                      title =f"year and quater combinations for top 10 States : {table_name}", color_discrete_sequence = px.colors.sequential.Magenta) 
+        fig1.update_layout(yaxis={'categoryorder': 'total ascending'})
+        #st.plotly_chart(fig1, use_container_width=True)
 
     
 
         # top 10 pincodes tranaction_ampunt: 
-        year = [year[0]]
+    
         query = f"""SELECT Quaters,Pincodes,SUM(Transaction_amount) AS Transaction_amount 
                     FROM top_insurance 
                     WHERE Years = %s 
                     GROUP BY Quaters,Pincodes 
+                    HAVING Quaters = %s 
                     ORDER BY Transaction_amount,Quaters DESC LIMIT 10"""
-        cursor.execute(query,year)
+        cursor.execute(query,data)
         table = cursor.fetchall()
         df2 = pd.DataFrame(table, columns = ['Quaters','Pincodes', 'Transaction_amount']) 
         df2['Pincodes'] = df2['Pincodes'].astype('string')
-        fig2 = px.bar(df2, x = 'Quaters', y = 'Transaction_amount', title = f"Top 10 pincodes {year}",hover_name = 'Pincodes')
+        #fig2 = px.bar(df2, x = 'Quaters', y = 'Transaction_amount', title = f"Top 10 pincodes {year}",hover_name = 'Pincodes', 
+                      #color_discrete_sequence = px.colors.sequential.Magenta) 
+        fig2 = px.pie(df2, values='Transaction_amount', names='Pincodes',title = 'pie chart for Top pincodes')
         #st.plotly_chart(fig2, use_container_width=True)
   
 
-        query = f"""SELECT States,SUM(Register_users) AS Register_users 
-                    FROM top_user 
-                    WHERE Years = %s AND Quaters = %s 
-                    GROUP BY States 
-                    ORDER BY Register_users DESC LIMIT 10"""
-        cursor.execute(query,data) 
-        table = cursor.fetchall() 
-        df3 = pd.DataFrame(table, columns = ['States','Register_users']) 
-        df3['States'] = df3['States'].str.strip().str.title()
-        fig3 = px.bar(df3, x = 'States', y = "Register_users", title="Top 10 States")
-        #st.plotly_chart(fig3, use_container_width=True)
-  
-
-        query = f"""SELECT Pincodes,SUM(Register_users) AS Register_users 
-                    FROM top_user 
-                    WHERE Years = %s  AND Quaters = %s 
-                    GROUP BY Pincodes 
-                    ORDER BY Register_users DESC LIMIT 10"""
-
-        cursor.execute(query,data) 
-        table = cursor.fetchall() 
-        df4 = pd.DataFrame(table, columns = ['Pincodes','Register_users']) 
-        fig4 = px.bar(df4, x = 'Register_users', hover_name = "Pincodes", title="Top 10 Pincodes",color = "Pincodes")
-        #st.plotly_chart(fig4, use_container_width=True)
-  
-
-        query = f"""SELECT Districts,SUM(Transaction_count) AS Transaction_count 
+        query = f"""SELECT Districts,Quaters,SUM(Transaction_amount) AS Transaction_amount 
                     FROM map_insurance 
-                    WHERE Years = %s AND Quaters = %s 
-                    GROUP BY Districts 
-                    ORDER BY Transaction_count DESC LIMIT 10"""
-
+                    WHERE Years = %s 
+                    GROUP BY Districts,Quaters
+                    HAVING Quaters = %s 
+                    ORDER BY Transaction_amount DESC LIMIT 10"""
         cursor.execute(query,data) 
         table = cursor.fetchall() 
-        df5 = pd.DataFrame(table, columns = ['Districts','Transaction_count'])
-        #df["Transaction_count"] = df5["Transaction_count"].astype('int64')
-        fig5 = px.bar(df5, x = 'Districts', y = "Transaction_count", title="Top 10 Districts") 
+        df3 = pd.DataFrame(table, columns = ['Districts','Quaters','Transaction_amount']) 
+        
+        fig3 = px.bar(df3, x = 'Districts', y = "Transaction_amount", title="Top 10 Districts")
+        #st.plotly_chart(fig3, use_container_width=True) 
+
+        query = f"""SELECT Districts,Quaters,SUM(Transaction_amount) AS Transaction_amount 
+                    FROM map_insurance 
+                    WHERE Years = %s 
+                    GROUP BY Districts,Quaters
+                    HAVING Quaters = %s 
+                    ORDER BY Transaction_amount LIMIT 10"""
+        cursor.execute(query,data) 
+        table = cursor.fetchall() 
+        df4 = pd.DataFrame(table, columns = ['Districts','Quaters','Transaction_amount']) 
+        
+        fig4 = px.bar(df4, x = 'Districts', y = "Transaction_amount", title="LOWEST 10 Districts", 
+                      color_discrete_sequence = px.colors.sequential.Agsunset)
+        #st.plotly_chart(fig4, use_container_width=True) 
+
+        query = f"""SELECT States,Quaters,SUM(Transaction_amount) AS Transaction_amount 
+                    FROM {table_name} 
+                    WHERE Years = %s 
+                    GROUP BY States,Quaters 
+                    HAVING Quaters = %s 
+                    ORDER BY  Transaction_amount LIMIT 10"""
+        cursor.execute(query,data)
+        table5 = cursor.fetchall()
+        df5= pd.DataFrame(table5, columns = ['States','Quaters','Transaction_amount'])
+        df5['States'] = df5['States'].str.strip().str.title()
+        fig5 = px.bar(df5, x = 'States', y = 'Transaction_amount',color = "Transaction_amount", hover_name = 'Quaters', 
+                      title ="LOWEST 10 states", 
+                      color_discrete_sequence = px.colors.sequential.Aggrnyl)
         #st.plotly_chart(fig5, use_container_width=True) 
+        c1,c2 =st.columns([1,1])
+        with c1:
+             st.plotly_chart(fig1, use_container_width=True)
+             
+        with c2:
+             #st.area_chart(df2)
+             st.plotly_chart(fig2, use_container_width=True)
 
-        fig_combined = make_subplots(rows = 2, cols = 2, subplot_titles =(" Top pincodes across Quaters ",
-                                                                    "Top 10 States",
-                                                                    "Top 10 Pincodes",
-                                                                    "Top 10 Districts ",
-                                                                    
-                                                                    ))
-            
-        for trace in fig2.data: 
-            fig_combined.add_trace(trace, row = 1, col = 1) 
-        for trace in fig3.data:
-                fig_combined.add_trace(trace, row = 1, col = 2) 
-        for trace in fig4.data:
-                fig_combined.add_trace(trace, row = 2, col = 1) 
-        for trace in fig5.data:
-                fig_combined.add_trace(trace, row = 2, col = 2) 
+        c3,c4,c5 = st.columns([1,1,1])
+        with c3:
+             st.plotly_chart(fig3, use_container_width=True) 
+        with c4:
+             st.plotly_chart(fig4, use_container_width=True) 
+        with c5:
+             st.plotly_chart(fig5, use_container_width=True) 
+             
+             
 
-    
-        fig_combined.update_layout(width = 1000,height = 600) 
-        st.plotly_chart(fig_combined, use_container_width=True) 
-
-
-        col1, col2 = st.columns([1, 1])
-        with col1:
-
-        #Agg_tansaction_type:
-            query = """SELECT Transaction_type, SUM(Transaction_amount) AS Transaction_amount 
-                       FROM agg_transaction 
-                       GROUP BY Transaction_type 
-                       ORDER BY Transaction_amount"""
-
-            cursor.execute(query)
-            table6 = cursor.fetchall()
-            df6 = pd.DataFrame(table6, columns = ['Transaction_type', 'Transaction_amount'])
-            fig6 = px.pie(df6, values = 'Transaction_amount', names = 'Transaction_type', title= "Transaction_types vs Transaction_amount")
-            fig6.update_layout(uniformtext_minsize = 12, uniformtext_mode = 'hide') 
-            st.plotly_chart(fig6, use_container_width=True) 
-
-        with col2:
-        #Agg_tansaction_type:
-            query = """SELECT Transaction_type, SUM(Transaction_count) AS Transaction_count 
-                       FROM agg_transaction 
-                       GROUP BY Transaction_type 
-                       ORDER BY Transaction_count""" 
-            cursor.execute(query)
-            table7 = cursor.fetchall()
-            df7 = pd.DataFrame(table7, columns = ['Transaction_type', 'Transaction_count'])
-            fig7 = px.pie(df7, values = 'Transaction_count', names = 'Transaction_type', title= "Transaction_types vs Transaction_count")
-            fig7.update_layout(uniformtext_minsize = 12, uniformtext_mode = 'hide') 
-            st.plotly_chart(fig7, use_container_width=True) 
-    
 
     years_list = top_insurance['Years'].unique()
-    quaters_list = top_insurance['Quaters'].unique()
     option1 = st.selectbox('years_option',years_list)
-    option2 = st.selectbox('Quaters',quaters_list)
+    sl = st.slider('Quaters', min_value = 1, max_value = 4, step = 1)
 
-    year_quater_combinations([option1,option2],str(selected_option)) 
+    year_quater_combinations([option1,sl],str(selected_option)) 
 
     
-    
-
- 
                                                                                                                                                                                                                                                                                                                                                 
