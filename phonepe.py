@@ -506,7 +506,7 @@ with col1:
 
     st.title("PHONEPE DATA EXTRACTION AND DATA VISUALIZATION") 
     st.markdown(
-        '<p style="font-size:30px; color:red;">Phonepe is a Easy TransactionApp, You can transfer any Bank to any Bank Securly !</p>',
+        '<p style="font-size:20px; color:black;">Phonepe is a Easy TransactionApp, You can transfer any Bank to any Bank Securly !</p>',
         unsafe_allow_html=True
     ) 
 
@@ -529,33 +529,83 @@ with st.sidebar:
         "PAGES",["Home", "All_Datas", "Data_Visualization", "TOP_charts"]
     ) 
 
-if option == 'Home':
+if option == 'Home': 
+
+    st.markdown("""
+        <style>
+        [data-testid=stAppViewContainer] {
+        background-color: #BAABD8
+        }
+        </style>
+        """, unsafe_allow_html=True)
+    
     main_col, side_col = st.columns([3, 1])
 
     with main_col:
-    
-    
-        query = "SELECT States,SUM(Register_users) AS Register_users FROM top_user GROUP BY States ORDER BY Register_users"
-        cursor.execute(query) 
-        table = cursor.fetchall()
-        df = pd.DataFrame(table,columns = ['States', 'Register_users']) 
-        df['States'] = df['States'].str.strip().str.title()
-        df['Register_users'] = pd.to_numeric(df['Register_users'])
 
-        fig = px.choropleth(
-            df,
-            geojson="https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson",
-            featureidkey='properties.ST_NM',
-            locations='States',
-            color='Register_users',
-            color_continuous_scale='Reds',
-            height=500, width=500
-        )
 
-        fig.update_geos(fitbounds="locations", visible=False)
-    
-        fig.update_layout(plot_bgcolor="#CFC8DD", title_text='Register Users Across States')
-        st.plotly_chart(fig,use_container_width=True) 
+        st.markdown("""
+        <style>
+        /* Change the background color of the dropdown menu */
+        div[role="listbox"] ul {
+        background-color: #BAABD8;
+        }
+        /* Change the background color of the input area of the selectbox */
+        div[data-baseweb="select"] > div {
+        background-color: #BAABD8;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+        
+        option_1 = st.selectbox(" ", ["Top_user","Top_transaction"], width = 200)
+     
+        if option_1 == 'Top_user':
+            query = "SELECT States,SUM(Register_users) AS Register_users FROM top_user GROUP BY States ORDER BY Register_users"
+            cursor.execute(query) 
+            table = cursor.fetchall()
+            df = pd.DataFrame(table,columns = ['States', 'Register_users']) 
+            df['States'] = df['States'].str.strip().str.title()
+            df['Register_users'] = pd.to_numeric(df['Register_users'])
+
+            fig = px.choropleth(
+                df,
+                geojson="https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson",
+                featureidkey='properties.ST_NM',
+                locations='States',
+                color='Register_users',
+                color_continuous_scale='Reds',
+                height=500, width=500
+            )
+
+            fig.update_geos(fitbounds="locations", visible=False,bgcolor ="#BAABD8" )
+        
+            fig.update_layout(paper_bgcolor="#BAABD8", title_text='Register Users Across States')
+            st.plotly_chart(fig,use_container_width=True) 
+
+        elif option_1 == 'Top_transaction' : 
+            query = "SELECT States,SUM(Transaction_count) AS Total_Transaction_count FROM top_insurance GROUP BY States ORDER BY Total_Transaction_count"
+            cursor.execute(query) 
+            table = cursor.fetchall()
+            df = pd.DataFrame(table,columns = ['States', 'Total_Transaction_count']) 
+            df['States'] = df['States'].str.strip().str.title()
+            df['Total_Transaction_count'] = pd.to_numeric(df['Total_Transaction_count'])
+
+            fig = px.choropleth(
+                df,
+                geojson="https://gist.githubusercontent.com/jbrobst/56c13bbbf9d97d187fea01ca62ea5112/raw/e388c4cae20aa53cb5090210a42ebb9b765c0a36/india_states.geojson",
+                featureidkey='properties.ST_NM',
+                locations='States',
+                color='Total_Transaction_count',
+                color_continuous_scale='Reds',
+                height=500, width=500
+            )
+
+            fig.update_geos(fitbounds="locations", visible=False,bgcolor ="#BAABD8" )
+        
+            fig.update_layout(paper_bgcolor="#BAABD8", title_text='Transaction_counts Across States')
+            st.plotly_chart(fig,use_container_width=True) 
+             
+             
 
 
         #SIDE BUTTONS HOME PAGE:
@@ -569,7 +619,7 @@ if option == 'Home':
         st.markdown('<div class="right-button">', unsafe_allow_html=True)
        
         option = st.radio(
-            "PAGES",["Pincodes", "States", "Districts"], horizontal=True) 
+            " ",["Pincodes", "States", "Districts"], horizontal=True) 
         def year_quater(year):
             year = year
             if option == 'Pincodes':
@@ -620,7 +670,9 @@ elif option == 'All_Datas':
    
     
     # Define the options for the select box
-    options = ["Agg_transaction", "Agg_user", "Agg_insurance", "Map_transaction", "Map_user", "Map_insurance", "Top_transaction", "Top_user", "Top_insurance"] 
+    options = ["Agg_transaction", "Agg_user", "Agg_insurance", 
+               "Map_transaction", "Map_user", "Map_insurance", 
+               "Top_transaction", "Top_user", "Top_insurance"] 
     d = {
         'Agg_transaction': agg_transaction, 'Agg_user' : agg_user, 'Agg_insurance' : agg_insurance,
          'Map_transaction' : map_transaction, 'Map_user' : map_user, 'Map_insurance' : map_insurance,
@@ -703,16 +755,16 @@ elif option == 'Data_Visualization':
         cursor.execute(query, state)
         table1 = cursor.fetchall() 
         df1 = pd.DataFrame(table1, columns = ['Years', 'Transaction_count', 'Transaction_amount'])
-        fig1 = px.line(df1, x = 'Years', y = 'Transaction_count',markers=True) 
-        fig2 = px.line(df1, x = 'Years', y = 'Transaction_amount',markers=True) 
-        col11,col21 = st.columns([1,1])
-        with col11: 
-             fig1 = px.line(df1, x = 'Years', y = 'Transaction_count') 
+         
+         
+        col23,col24 = st.columns([1,1])
+        with col23: 
+             fig1 = px.line(df1, x = 'Years', y = 'Transaction_count',markers=True, title = "Transaction_Count across years")
              fig1.update_traces(mode='lines+markers')
              st.plotly_chart(fig1, use_container_width=True) 
 
-        with col21: 
-             fig2 = px.line(df1, x = 'Years', y = 'Transaction_amount')
+        with col24: 
+             fig2 = px.line(df1, x = 'Years', y = 'Transaction_amount',markers=True,title = "Transaction_Amount across years")
              fig2.update_traces(mode='lines+markers')
              st.plotly_chart(fig2, use_container_width=True)  
              
@@ -720,154 +772,66 @@ elif option == 'Data_Visualization':
     option1 = st.selectbox("states",states_list)
     states([option1])
 
+    def Quater_wise(state):
+        state = state
+        query = f"""SELECT Quaters, SUM(Transaction_count) AS Transaction_count, SUM(Transaction_amount) AS Transaction_amount 
+                    FROM agg_transaction 
+                    WHERE States = %s 
+                    GROUP BY Quaters 
+                    ORDER BY Quaters""" 
+        cursor.execute(query, state)
+        table1 = cursor.fetchall() 
+        df1 = pd.DataFrame(table1, columns = ['Quaters', 'Transaction_count', 'Transaction_amount'])
+        
+        # Create a columns:
+        col25,col26 = st.columns([1,1])
+        with col25: 
+             fig1 = px.bar(df1, x = 'Quaters', y = 'Transaction_count', color ='Quaters', 
+                           title = 'Transaction_Count based on Quater ') 
+             #fig1.update_traces(mode='lines+markers')
+             st.plotly_chart(fig1, use_container_width=True) 
 
-    # Define the options for the select box
-    options = ["Agg_transaction", "Agg_insurance", "Map_transaction", "Map_insurance", "Top_transaction", "Top_insurance"] 
-    d_dataframes = {
-        'Agg_transaction': agg_transaction, 'Agg_insurance' : agg_insurance,
-         'Map_transaction' : map_transaction, 'Map_insurance' : map_insurance,
-         'Top_transaction': top_transaction, 'Top_insurance' : top_insurance 
-         } 
-    # Create the select box
-    selected_option = st.selectbox("Data_exploration for :", options) 
+        with col26: 
+             fig2 = px.bar(df1, x = 'Quaters', y = 'Transaction_amount', color = 'Quaters', 
+                           title='Transaction_Amount based on Quater') 
+             #fig2.update_traces(mode='lines+markers')
+             st.plotly_chart(fig2, use_container_width=True)  
+             
+    states_list = agg_transaction['States'].unique()
+    option1 = st.selectbox("statess",states_list)
+    Quater_wise([option1]) 
+
+    # Region consisitant growth:
+
+    query = """SELECT States, Years, SUM(Transaction_amount) AS Transaction_amount 
+               FROM agg_transaction 
+               GROUP BY States,Years 
+               ORDER BY Transaction_amount"""
+    cursor.execute(query)
+    table = cursor.fetchall()
+    df = pd.DataFrame(table, columns = ['States', 'Years', 'Transaction_amount'])
+    fig1 =px.line(df, y='Transaction_amount', x='Years', color ='States', 
+                  title= "Year wise Transaction growth across Regions")
+     
     
-                      
-
-    # Use the selected option in your app 
-    st.markdown("""
-## Selected data exploration is :
-""")
-    #st.write("Selected dataframe is :")
-    #st.write(selected_option) 
-    #st.write(d_dataframes[selected_option]) 
-
-    def year_s(year,table_name):
-        data = year
-        query = f"""SELECT States,Years,SUM(Transaction_count) AS Transaction_count 
-        FROM {table_name} 
-        WHERE Years = %s GROUP BY States  
-        ORDER BY Transaction_count""" 
-        cursor.execute(query,data)
-        table1 = cursor.fetchall()
-        df1 = pd.DataFrame(table1, columns = ['States','Years', 'Transaction_count'])
-        fig_bar1 = px.bar(df1, x = 'States', y = 'Transaction_count' ,
-                          title = f" Transaction_count  For  States  Wise : {table_name} In Year of {data[0]} ")
-       
-                                                        
-        
-        query = f"""SELECT States,SUM(Transaction_amount) AS Transaction_amount 
-                    FROM {table_name} 
-                    WHERE Years = %s 
-                    GROUP BY States 
-                    ORDER BY Transaction_amount""" 
-        cursor.execute(query,data)
-        table2 = cursor.fetchall()
-        df2 = pd.DataFrame(table2, columns = ['States', 'Transaction_amount'])
-        fig_bar2 = px.bar(df2,x='States',y='Transaction_amount',
-                          title = f" Transaction_amount  For  States  Wise : {table_name} In Year of {data[0]} ") 
-        
-         
-
-
-        # second bar plot: 
-        query = f"""SELECT States, SUM(Transaction_amount) AS Transaction_amount 
-                    FROM {table_name} 
-                    GROUP BY States 
-                    ORDER BY Transaction_amount 
-                    DESC LIMIT 10 """
-        cursor.execute(query) 
-
-        table4 = cursor.fetchall()
-        df4 = pd.DataFrame(table4, columns = ['States', 'Transaction_amount']) 
-        fig_bar4 = px.bar(df4,x='States',y='Transaction_amount',
-                          title = "Years Wise Transaction_Amount",
-                          color_discrete_sequence = px.colors.sequential.Aggrnyl)
-
+    # the region consisitant growth based on region:
+    query = """SELECT States,Quaters, SUM(Transaction_amount) AS Transaction_amount 
+                        FROM agg_transaction 
+                        GROUP BY States,Quaters 
+                        ORDER BY Transaction_amount""" 
+    cursor.execute(query)
+    table = cursor.fetchall() 
+    df = pd.DataFrame(table, columns = ['States', 'Quaters', 'Transaction_amount'])
+    fig2 = px.line(df, x= 'States', y= 'Transaction_amount', color = 'Quaters', 
+                   title= "Quater wise Transaction growth across Regions") 
     
 
-        # states wise transaction_count:
-        query = f"""SELECT States,SUM(Transaction_count) AS Transaction_count 
-                    FROM {table_name} 
-                    GROUP BY States 
-                    ORDER BY Transaction_count""" 
-        cursor.execute(query)
-
-
-        table5 = cursor.fetchall()
-        df5 = pd.DataFrame(table5, columns = ['States', 'Transaction_count'])
-        fig_bar5 = px.bar(df5, x = 'States', y = 'Transaction_count', 
-                          title = "States wise Transaction_Count",
-                          color_discrete_sequence = px.colors.sequential.Blackbody )
+    col27,col28 = st.columns([1,1])
+    with col27:
+        st.plotly_chart(fig1, use_container_width=True)
+    with col28: 
+        st.plotly_chart(fig2, use_container_width=True) 
         
-
-
-        #  states lowest transaction_count:
-        query = f"""SELECT States,SUM(Transaction_count) AS Transaction_count 
-                    FROM {table_name} 
-                    GROUP BY States 
-                    ORDER BY Transaction_count LIMIT 15""" 
-        cursor.execute(query)
-
-
-        table6 = cursor.fetchall()
-        df6 = pd.DataFrame(table6, columns = ['States', 'Transaction_count'])
-        #df6
-
-        fig_bar6 = px.bar(df6, x = 'States', y = 'Transaction_count', 
-                          title = "TOP 15 States LOWEST Transaction_Count ", 
-                          color_discrete_sequence = px.colors.sequential.Agsunset )
-       
-
-        # top 10 states highest transaction_count:
-
-        query = f"""SELECT States,SUM(Transaction_count) AS Transaction_count 
-                    FROM {table_name} 
-                    GROUP BY States 
-                    ORDER BY Transaction_count DESC LIMIT 10""" 
-        cursor.execute(query)
-
-
-        table7 = cursor.fetchall()
-        df7 = pd.DataFrame(table7, columns = ['States', 'Transaction_count'])
-          
-
-        fig_bar7 = px.bar(df7, x = 'States', y = 'Transaction_count', 
-                          title = "TOP 10 States wise Transaction_Count ", 
-                          color_discrete_sequence = px.colors.sequential.Aggrnyl)
-       
-        fig_combined = make_subplots(rows = 2, cols = 3, subplot_titles =(f" Transaction_amount  For  States  Wise : {table_name} In Year of {data[0]}",
-                                                                f" Transaction_count  For  States  Wise : {table_name} In Year of {data[0]}",
-                                                                "Top 10 states Transaction_Amount","States wise Transaction_Count",
-                                                                "TOP 15 States LOWEST Transaction_Count ","TOP 10 States wise Transaction_Count "))
-        
-        for trace in fig_bar1.data: 
-            fig_combined.add_trace(trace, row = 1, col = 1) 
-        for trace in fig_bar2.data:
-            fig_combined.add_trace(trace, row = 1, col = 2) 
-        for trace in fig_bar4.data:
-            fig_combined.add_trace(trace, row = 1, col = 3) 
-        for trace in fig_bar5.data:
-            fig_combined.add_trace(trace, row = 2, col = 1) 
-        for trace in fig_bar6.data:
-            fig_combined.add_trace(trace, row = 2, col = 2) 
-        for trace in fig_bar7.data:
-            fig_combined.add_trace(trace, row = 2, col = 3) 
-
-
-        fig_combined.update_layout(height = 1000) 
-        st.plotly_chart(fig_combined, use_container_width=True)  
-
-
-
-
-       
-        
-
-        #return df9 
-    d = d_dataframes[str(selected_option)]    
-    years = d['Years'].unique()
-    option = st.radio('years_option',years, horizontal= True)
-    year_s([option],str(selected_option))  
 
 
     st.markdown(
@@ -994,16 +958,15 @@ elif option == 'Data_Visualization':
         cursor.execute(query, district)
         table1 = cursor.fetchall() 
         df1 = pd.DataFrame(table1, columns = ['Years', 'Transaction_count', 'Transaction_amount'])
-        fig1 = px.line(df1, x = 'Years', y = 'Transaction_count',markers=True) 
-        fig2 = px.line(df1, x = 'Years', y = 'Transaction_amount',markers=True) 
+        
         col11,col21 = st.columns([1,1])
         with col11: 
-             fig1 = px.line(df1, x = 'Years', y = 'Transaction_count') 
+             fig1 = px.line(df1, x = 'Years', y = 'Transaction_count',title= "YEAR WISE TOTAL TRANSACTION_COUNT") 
              fig1.update_traces(mode='lines+markers')
              st.plotly_chart(fig1, use_container_width=True) 
 
         with col21: 
-             fig2 = px.line(df1, x = 'Years', y = 'Transaction_amount')
+             fig2 = px.line(df1, x = 'Years', y = 'Transaction_amount',title= "YEAR WISE TOTAL TRANSACTION_AMOUNT")
              fig2.update_traces(mode='lines+markers')
              st.plotly_chart(fig2, use_container_width=True)  
              
